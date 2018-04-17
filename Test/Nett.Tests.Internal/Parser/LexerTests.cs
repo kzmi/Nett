@@ -564,6 +564,21 @@ namespace Nett.Tests.Internal.Parser
                 .AssertNoMoreTokens();
         }
 
+        [Theory]
+        [InlineData("x = 100#C")]
+        [InlineData("x = 100 #C")]
+        public void Lex_WhenCommentApppendedWithoutSpace_ProducesFinalCommentToken(string input)
+        {
+            // Arrange
+            var l = CreateLexer(input);
+
+            // Act
+            var r = l.Lex();
+
+            // Asset
+            r.Last().type.Should().Be(TokenType.Comment);
+        }
+
         private static Lexer CreateValueLexer(string valueToken)
             => new Lexer($"X={valueToken}");
 

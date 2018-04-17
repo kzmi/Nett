@@ -58,7 +58,7 @@ namespace Nett.Parser
 
         public static bool IsTokenSepChar(this char c)
             => c == ' ' || c == '\t' || c == '=' || c == ']' || c == ','
-                || c == '}' || c == '\r' || c == '\n' || c == LexInput.EofChar;
+                || c == '}' || c == '\r' || c == '\n' || c == '#' || c == LexInput.EofChar;
 
         public static bool IsWhitespaceChar(this char c)
             => WhitspaceCharSet.Contains(c);
