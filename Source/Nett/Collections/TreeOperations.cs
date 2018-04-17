@@ -69,6 +69,8 @@ namespace Nett.Collections
         {
             result.Add(new WithDepth<T>(curDepth, current));
 
+            if (current == null) { return; }
+
             foreach (var child in current.GetChildren())
             {
                 TraversePreOrderWithDepth(child, result, curDepth + 1);

@@ -15,11 +15,50 @@ namespace Nett.Tests.Internal.Parser
 
             // Assert
             parsed.PrintTree().Trim().Should().Be(@"
-T
- E -> k=V
-  k -> x
-  s -> =
-  V -> 100
+S
+ E
+  k~x
+  s~=
+  V~100
+".Trim());
+        }
+
+        [Fact]
+        public void Parse_SingleKeyValueWithComment_CreatesCorrectAst()
+        {
+            // Act
+            var parsed = Parse("x = 100#C");
+
+            // Assert
+            parsed.PrintTree().Trim().Should().Be(@"
+S
+ E
+  k~x
+  s~=
+  V~100
+  C
+".Trim());
+        }
+
+        [Fact]
+        public void Parse_MultipleExpressions_CreatesCorrectAst()
+        {
+            // Act
+            var parsed = Parse(@"x = 1
+y = 2");
+
+            // Assert
+            parsed.PrintTree().Trim().Should().Be(@"
+S
+ E
+  k~x
+  s~=
+  V~1
+ NE
+  E
+   k~y
+   s~=
+   V~2
 ".Trim());
         }
 
@@ -31,8 +70,8 @@ T
 
             // Assert
             parsed.PrintTree().Trim().Should().Be(@"
-T
- T -> tablekey
+S
+ E~[tablekey]
 ".Trim());
         }
 
@@ -44,13 +83,41 @@ T
 
             // Assert
             parsed.PrintTree().Trim().Should().Be(@"
-T
- E -> k=V
-  k -> x
-  s -> =
+S
+ E
+  k~x
+  s~=
   A
-   s -> [
-   s -> ]
+   s~[
+   s~]
+".Trim());
+        }
+
+        [Fact]
+        public void Parse_TwoEmptySubArrays_CreatesCorrectAst()
+        {
+            // Act
+            var parsed = Parse("x = [[], []]");
+
+            // Assert
+            parsed.PrintTree().Trim().Should().Be(@"
+S
+ E
+  k~x
+  s~=
+  A
+   s~[
+   AI
+    A
+     s~[
+     s~]
+    AS
+     s~,
+     AI
+      A
+       s~[
+       s~]
+   s~]
 ".Trim());
         }
 
@@ -62,14 +129,15 @@ T
 
             // Assert
             parsed.PrintTree().Trim().Should().Be(@"
-T
- E -> k=V
-  k -> x
-  s -> =
+S
+ E
+  k~x
+  s~=
   A
-   s -> [
-   V -> 100
-   s -> ]
+   s~[
+   AI
+    V~100
+   s~]
 ".Trim());
         }
 
@@ -81,15 +149,17 @@ T
 
             // Assert
             parsed.PrintTree().Trim().Should().Be(@"
-T
- E -> k=V
-  k -> x
-  s -> =
+S
+ E
+  k~x
+  s~=
   A
-   s -> [
-   V -> 100
-   s -> ,
-   s -> ]
+   s~[
+   AI
+    V~100
+    AS
+     s~,
+   s~]
 ".Trim());
         }
 
@@ -101,16 +171,68 @@ T
 
             // Assert
             parsed.PrintTree().Trim().Should().Be(@"
-T
- E -> k=V
-  k -> x
-  s -> =
+S
+ E
+  k~x
+  s~=
   A
-   s -> [
-   V -> 100
-   s -> ,
-    V -> 200
-   s -> ]
+   s~[
+   AI
+    V~100
+    AS
+     s~,
+     AI
+      V~200
+   s~]
+".Trim());
+        }
+
+        [Fact]
+        public void Parse_EmptyNewlineArray_CreatesCorrectAst()
+        {
+            // Act
+            var parsed = Parse(@"x = [
+]");
+
+            // Assert
+            parsed.PrintTree().Trim().Should().Be(@"
+S
+ E
+  k~x
+  s~=
+  A
+   s~[
+   s~]
+".Trim());
+        }
+
+        [Fact]
+        public void Parse_ArrayWithValuesAndNewlines_CreatesCorrectAst()
+        {
+            // Act
+            var parsed = Parse(@"x = [
+                100
+,
+
+200
+
+]");
+
+            // Assert
+            parsed.PrintTree().Trim().Should().Be(@"
+S
+ E
+  k~x
+  s~=
+  A
+   s~[
+   AI
+    V~100
+    AS
+     s~,
+     AI
+      V~200
+   s~]
 ".Trim());
         }
 
@@ -122,7 +244,7 @@ T
 
             // Assert
             parsed.PrintTree().Trim().Should().Be(@"
-T
+S
  X
 ".Trim());
         }
@@ -135,22 +257,38 @@ T
 
             // Assert
             parsed.PrintTree().Trim().Should().Be(@"
-T
- E -> k=V
-  k -> x
-  s -> =
+S
+ E
+  k~x
+  s~=
   X
 ".Trim());
         }
 
+        [Fact]
+        public void Parse_InlineTable_ProducesCorrectAst()
+        {
+            // Act
+            var parsed = Parse("x = {}");
 
+            // Assert
+            parsed.PrintTree().Trim().Should().Be(@"
+S
+ E
+  k~x
+  s~=
+  I
+   s~{
+   s~}
+".Trim());
+        }
 
         private static Node Parse(string input)
         {
             var lexer = new Lexer(input);
             var tokens = lexer.Lex();
             var parser = new AstParser(new ParseInput(tokens));
-            return parser.Parse();
+            return parser.Parse().Node;
         }
     }
 }

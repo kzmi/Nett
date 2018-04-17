@@ -1,19 +1,23 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Nett.Parser.Ast
 {
-    internal sealed class ArraySeparatorNode : SymbolNode
+    internal sealed class ArraySeparatorNode : Node
     {
-        public ArraySeparatorNode(Token symbol, Opt<ArrayItemNode> nextItem)
-            : base(symbol)
+        public ArraySeparatorNode(Token symbol, IOpt<ArrayItemNode> nextItem)
         {
+            this.Seprator = new SymbolNode(symbol).Req();
             this.NextItem = nextItem;
         }
 
-        public Opt<ArrayItemNode> NextItem { get; }
+        public IReq<SymbolNode> Seprator { get; }
+
+        public IOpt<ArrayItemNode> NextItem { get; }
 
         public override IEnumerable<Node> Children
-            => base.Children.Concat(EnumerableEx.NonNullItems<Node>(this.NextItem));
+            => NonNullNodesAsEnumerable(this.Seprator, this.NextItem);
+
+        public override string ToString()
+            => "AS";
     }
 }

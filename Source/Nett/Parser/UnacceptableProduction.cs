@@ -3,9 +3,7 @@ using Nett.Parser.Ast;
 
 namespace Nett.Parser
 {
-    internal sealed partial class ParseInput
-    {
-        private class UnacceptableProduction : IProduction1, IProduction2, IProduction3
+        internal sealed class UnacceptableProduction : IProduction1, IProduction2, IProduction3
         {
             public UnacceptableProduction()
             {
@@ -43,6 +41,5 @@ namespace Nett.Parser
 
             IProduction2 IProduction1.Expect(Func<Token, bool> predicate)
                 => this;
-        }
     }
 }

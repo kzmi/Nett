@@ -38,9 +38,9 @@ namespace Nett.Parser.Ast
         }
 
         protected static IEnumerable<Node> NodesAsEnumerable(params IReq<Node>[] nodes)
-            => nodes.Select(n => (Node)n);
+            => nodes.Select(n => n.Node);
 
         protected static IEnumerable<Node> NonNullNodesAsEnumerable(params INode<Node>[] nodes)
-            => nodes.Select(n => (Node)n).Where(n => n != null);
+            => nodes.Select(n => n.Node).Where(n => n != null);
     }
 }

@@ -1,15 +1,19 @@
-
+n... newline
 
 S -> E R                    first(S) = {c, eps}             follow(S) = {$}
 R -> n X                    first(R) = {n, eps}             follow(R) = {$}
 X -> E R | eps
-E -> c | [k] | k=V          first(E) = {c, [, k}            follow(E) = {c, eps, $}
-V -> v | [A] | {I}          first(V) = {v, [, {}            follow(V) = {n}
-A -> A']                                                follow(A) = {]}
-A' -> AI | eps
-AI ->  V AS | eps                                           follow(AI) = {], ','}
-AS -> , AI | eps                                            follow(AS) = {]}
+E -> c | [k] C | k=V C      first(E) = {c, [, k}            follow(E) = {c, n, eps, $}
+V -> v | [A | {I            first(V) = {v, [, {}            follow(V) = {n}
+C -> c | eps
 
+A -> AI]
+AI -> V AS | eps                                               follow(A) = {]}
+AS -> , AI | eps
+
+I -> II]
+II -> k=V IN | eps
+IN -> , II | eps
 
 
 

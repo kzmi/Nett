@@ -4,9 +4,7 @@ using Nett.Parser.Ast;
 
 namespace Nett.Parser
 {
-
-
-    internal sealed partial class ParseInput
+    internal sealed partial class ParseInput : IParseInput
     {
         private static readonly Token NoTokenAvailable = Token.EndOfFile(-1, -1);
 
@@ -19,7 +17,7 @@ namespace Nett.Parser
             this.tokens = tokens;
         }
 
-        public bool Eos
+        public bool IsFinished
             => this.index > this.tokens.Count - 1;
 
         private Token CurrentToken =>
@@ -27,39 +25,13 @@ namespace Nett.Parser
                 ? this.tokens[this.index]
                 : NoTokenAvailable;
 
-        public IProduction1 Accept(Func<Token, bool> predicate)
-        {
-            IProduction production = new Production(this);
-            return production.Accept(predicate);
-        }
+        public Token Advance()
+           => this.tokens[this.index++];
 
         public SyntaxErrorNode CreateErrorNode()
             => SyntaxErrorNode.Unexpected(this.CurrentToken);
 
-        public IProduction1 Expect(Func<Token, bool> predicate)
-        {
-            IProduction production = new Production(this);
-            return production.Expect(predicate);
-        }
-
         public bool Peek(Func<Token, bool> predicate)
             => predicate(this.CurrentToken);
-
-        public bool ExpectNewlines()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<Token> SkipWhitespace()
-        {
-            while (this.CurrentToken.type == TokenType.NewLine)
-            {
-                yield return this.CurrentToken;
-                this.Advance();
-            }
-        }
-
-        private Token Advance()
-            => this.tokens[this.index++];
     }
 }

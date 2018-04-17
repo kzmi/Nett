@@ -16,6 +16,6 @@ namespace Nett.Parser.Ast
             => Enumerable.Empty<Node>();
 
         public override string ToString()
-            => $"V -> {this.Value.value}";
+            => $"V~{this.Value.value}";
     }
 }

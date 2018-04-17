@@ -4,7 +4,9 @@ namespace Nett.Parser.Ast
 {
     internal interface INode<out T>
     {
-        T Node { get; }
+        Node Node { get; }
+
+        T SyntaxNode { get; }
 
         SyntaxErrorNode Error { get; }
     }
@@ -46,11 +48,11 @@ namespace Nett.Parser.Ast
 
         public static IOpt<T> Or<T>(this IOpt<T> x, IOpt<T> y)
             where T : Node
-            => x.Node != null ? x : y;
+            => x.SyntaxNode != null ? x : y;
 
         public static IReq<T> Or<T>(this IOpt<T> x, Node y)
             where T : Node
-            => new Req<T>(x.Node ?? y);
+            => new Req<T>(x.SyntaxNode ?? y);
     }
 
     internal sealed class Req<T> : Opt<T>, IReq<T>
@@ -75,23 +77,23 @@ namespace Nett.Parser.Ast
         {
             this.Error = node as SyntaxErrorNode;
 
-            if (this.Error != null)
+            if (this.Error == null)
             {
-                this.Node = (T)node;
+                this.SyntaxNode = (T)node;
             }
         }
 
-        public T Node { get; }
+        public T SyntaxNode { get; }
 
         public SyntaxErrorNode Error { get; }
 
-        public static implicit operator Node(Opt<T> parsed)
-            => (Node)parsed.Node ?? parsed.Error;
+        public Node Node
+            => (Node)this.SyntaxNode ?? this.Error;
 
         public IOpt<TRes> As<TRes>()
             where TRes : Node
         {
-            return new Opt<TRes>((Node)this.Node ?? this.Error);
+            return new Opt<TRes>((Node)this.SyntaxNode ?? this.Error);
         }
     }
 }

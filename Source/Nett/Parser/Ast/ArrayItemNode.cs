@@ -16,5 +16,8 @@ namespace Nett.Parser.Ast
 
         public override IEnumerable<Node> Children
             => NonNullNodesAsEnumerable(this.Value, this.Separator);
+
+        public override string ToString()
+            => "AI";
     }
 }

@@ -1,31 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Nett.Parser.Ast;
 
 namespace Nett.Parser
 {
     internal sealed class AstParser
     {
-        private readonly ParseInput input;
+        private readonly MultiParseInput input;
 
-        public AstParser(ParseInput input)
+        public AstParser(IParseInput input)
         {
-            this.input = input;
+            this.input = new MultiParseInput(input, new SkippingParseInput(input, toSkip: TokenType.NewLine));
         }
 
-        public TomlNode Parse()
+        public IOpt<StartNode> Parse()
         {
-            this.input.SkipWhitespace();
+            if (this.input.IsFinished) { return Opt<StartNode>.None; }
 
-            if (this.input.Eos) { return TomlNode.Empty(); }
+            var expressions = new List<IReq<ExpressionNode>>();
 
-            var expressions = new List<ExpressionNode>();
+            var exp = this.Expression();
+            var next = this.NextExpression();
 
-            var exp = this.Expression().Node;
-            expressions.Add(exp);
-            //this.NextExpression();
-
-            return new TomlNode(expressions);
+            return new StartNode(exp, next).Opt();
         }
 
         private IReq<ExpressionNode> Expression()
@@ -44,7 +40,7 @@ namespace Nett.Parser
                 => this.input
                     .Accept(t => t.type == TokenType.BareKey)
                     .Expect(t => t.type == TokenType.Assign)
-                    .CreateNode((k, a) => new KeyValueExpressionNode(k, a, this.Value()).Opt());
+                    .CreateNode((k, a) => new KeyValueExpressionNode(k, a, this.Value(), this.Comment()).Opt());
 
             IOpt<TableNode> Table()
                 => this.input
@@ -54,11 +50,14 @@ namespace Nett.Parser
                     .CreateNode((_, k, __) => new TableNode(k).Opt());
         }
 
-        private IEnumerable<ExpressionNode> NextExpression()
+        private IOpt<NextExpressionNode> NextExpression()
         {
-            this.input.ExpectNewlines();
+            if (this.input.AcceptNewLines() && !this.input.IsFinished)
+            {
+                return new NextExpressionNode(this.Expression(), this.NextExpression()).Opt();
+            }
 
-            throw new NotImplementedException();
+            return Opt<NextExpressionNode>.None;
         }
 
         private IReq<ValueNode> Value()
@@ -87,17 +86,24 @@ namespace Nett.Parser
             IOpt<InlineTableNode> InlineTable()
                 => this.input
                     .Accept(t => t.type == TokenType.LCurly)
-                    .CreateNode(_ => this.InlineTable().AsOpt());
+                    .CreateNode(t => this.InlineTable(t).AsOpt());
         }
+
+        private IOpt<CommentNode> Comment()
+            => this.input.Accept(t => t.type == TokenType.Comment)
+                .CreateNode(t => new CommentNode(t).Opt());
 
         private IReq<ArrayNode> Array(Token lbrac)
         {
-            var items = this.ArrayItems();
-            return this.input.Expect(t => t.type == TokenType.RBrac)
-                .CreateNode(t => ArrayNode.Create(lbrac, t, items).Req());
+            using (this.input.UseIgnorewNewlinesInput())
+            {
+                var item = this.ArrayItem();
+                return this.input.Expect(t => t.type == TokenType.RBrac)
+                    .CreateNode(t => ArrayNode.Create(lbrac, t, item).Req());
+            }
         }
 
-        private IOpt<ArrayItemNode> ArrayItems()
+        private IOpt<ArrayItemNode> ArrayItem()
         {
             if (Epsilon()) { return Opt<ArrayItemNode>.None; }
 
@@ -108,11 +114,6 @@ namespace Nett.Parser
 
             bool Epsilon()
                 => this.input.Peek(t => t.type == TokenType.RBrac);
-        }
-
-        private Opt<ArrayItemNode> ArrayItem()
-        {
-            throw new NotImplementedException();
         }
 
         private IOpt<ArraySeparatorNode> ArraySeparator()
@@ -126,9 +127,39 @@ namespace Nett.Parser
                 => this.input.Peek(t => t.type == TokenType.RBrac);
         }
 
-        private IReq<InlineTableNode> InlineTable()
+        private IReq<InlineTableNode> InlineTable(Token lcurly)
         {
-            throw new NotImplementedException();
+            var item = this.InlineTableItem();
+
+            return this.input.Expect(t => t.type == TokenType.RCurly)
+                .CreateNode(t => new InlineTableNode(lcurly, t, item).Req());
+        }
+
+        private IOpt<InlineTableItemNode> InlineTableItem()
+        {
+            if (Epsilon()) { return Opt<InlineTableItemNode>.None; }
+
+            var kve = this.input.Expect(t => t.type == TokenType.Key)
+                .Expect(t => t.type == TokenType.Assign)
+                .CreateNode((k, a) => new KeyValueExpressionNode(k, a, this.Value(), Opt<CommentNode>.None).Req());
+
+            var next = this.NextInlineTableItem();
+
+            return new InlineTableItemNode(kve, next).Opt();
+
+            bool Epsilon()
+                => this.input.Peek(t => t.type == TokenType.RCurly);
+        }
+
+        private IOpt<InlineTableNextItemNode> NextInlineTableItem()
+        {
+            if (Epsilon()) { return Opt<InlineTableNextItemNode>.None; }
+
+            return this.input.Expect(t => t.type == TokenType.Comma)
+                .CreateNode(s => new InlineTableNextItemNode(s, this.InlineTableItem()).Opt());
+
+            bool Epsilon()
+                => this.input.Peek(t => t.type == TokenType.RCurly);
         }
 
         private void Epsilon()
