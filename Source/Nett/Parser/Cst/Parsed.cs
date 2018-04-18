@@ -1,6 +1,7 @@
-﻿using Nett.Extensions;
+﻿using System;
+using Nett.Extensions;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
     internal interface INode<out T>
     {
@@ -46,11 +47,15 @@ namespace Nett.Parser.Ast
             where T : Node
             => Required(node);
 
-        public static IOpt<T> Or<T>(this IOpt<T> x, IOpt<T> y)
+        public static IOpt<T> Or<T>(this IOpt<T> x, Func<IOpt<T>> y)
             where T : Node
-            => x.SyntaxNode != null ? x : y;
+            => x.SyntaxNode != null ? x : y();
 
-        public static IReq<T> Or<T>(this IOpt<T> x, Node y)
+        public static IReq<T> Orr<T>(this IOpt<T> x, Func<IReq<T>> y)
+            where T : Node
+            => x.Node != null ? new Req<T>(x.Node) : y();
+
+        public static IReq<T> OrNode<T>(this IOpt<T> x, Node y)
             where T : Node
             => new Req<T>(x.SyntaxNode ?? y);
     }
@@ -95,5 +100,8 @@ namespace Nett.Parser.Ast
         {
             return new Opt<TRes>((Node)this.SyntaxNode ?? this.Error);
         }
+
+        public IReq<T> ToReq()
+            => new Req<T>((Node)this.SyntaxNode ?? this.Error);
     }
 }

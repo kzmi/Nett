@@ -1,19 +1,19 @@
 ﻿using System.Collections.Generic;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
-    internal sealed class InlineTableNode : ValueNode
+    internal sealed class InlineTableNode : Node
     {
         public InlineTableNode(Token lcurly, Token rcurly, IOpt<InlineTableItemNode> first)
         {
-            this.LCurly = new SymbolNode(lcurly).Req();
-            this.RCurly = new SymbolNode(rcurly).Req();
+            this.LCurly = new TerminalNode(lcurly).Req();
+            this.RCurly = new TerminalNode(rcurly).Req();
             this.First = first;
         }
 
-        public IReq<SymbolNode> LCurly { get; }
+        public IReq<TerminalNode> LCurly { get; }
 
-        public IReq<SymbolNode> RCurly { get; }
+        public IReq<TerminalNode> RCurly { get; }
 
         public IOpt<InlineTableItemNode> First { get; }
 

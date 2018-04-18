@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
     internal sealed class MetaNode
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Nett.Collections;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
     internal abstract class Node : IGetChildren<Node>
     {

@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
     internal sealed class ArraySeparatorNode : Node
     {
         public ArraySeparatorNode(Token symbol, IOpt<ArrayItemNode> nextItem)
         {
-            this.Seprator = new SymbolNode(symbol).Req();
+            this.Seprator = new TerminalNode(symbol).Req();
             this.NextItem = nextItem;
         }
 
-        public IReq<SymbolNode> Seprator { get; }
+        public IReq<TerminalNode> Seprator { get; }
 
         public IOpt<ArrayItemNode> NextItem { get; }
 

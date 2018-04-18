@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
     internal sealed class SyntaxErrorNode : Node
     {

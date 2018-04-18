@@ -1,4 +1,4 @@
-﻿namespace Nett.Parser.Ast
+﻿namespace Nett.Parser.Cst
 {
     internal abstract class ExpressionNode : Node
     {

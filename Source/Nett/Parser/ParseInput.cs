@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Nett.Parser.Ast;
+using Nett.Parser.Cst;
 
 namespace Nett.Parser
 {

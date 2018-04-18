@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
     internal sealed class InlineTableItemNode : Node
     {
@@ -16,5 +16,8 @@ namespace Nett.Parser.Ast
 
         public override IEnumerable<Node> Children
             => NonNullNodesAsEnumerable(this.Expression, this.Next);
+
+        public override string ToString()
+            => "II";
     }
 }

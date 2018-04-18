@@ -1,24 +1,24 @@
 ﻿using System.Collections.Generic;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
-    internal sealed class ArrayNode : ValueNode
+    internal sealed class ArrayNode : Node
     {
-        private ArrayNode(IReq<SymbolNode> lbrac, IReq<SymbolNode> rbrac)
+        private ArrayNode(IReq<TerminalNode> lbrac, IReq<TerminalNode> rbrac)
             : this(lbrac, rbrac, AstNode.None<ArrayItemNode>())
         {
         }
 
-        private ArrayNode(IReq<SymbolNode> lbrac, IReq<SymbolNode> rbrac, IOpt<ArrayItemNode> item)
+        private ArrayNode(IReq<TerminalNode> lbrac, IReq<TerminalNode> rbrac, IOpt<ArrayItemNode> item)
         {
             this.LBrac = lbrac;
             this.RBrac = rbrac;
             this.Item = item;
         }
 
-        public IReq<SymbolNode> LBrac { get; }
+        public IReq<TerminalNode> LBrac { get; }
 
-        public IReq<SymbolNode> RBrac { get; }
+        public IReq<TerminalNode> RBrac { get; }
 
         public IOpt<ArrayItemNode> Item { get; }
 
@@ -26,10 +26,10 @@ namespace Nett.Parser.Ast
             => NonNullNodesAsEnumerable(this.LBrac, this.Item, this.RBrac);
 
         public static ArrayNode Empty(Token lbrac, Token rbrac)
-            => new ArrayNode(AstNode.Required(new SymbolNode(lbrac)), AstNode.Required(new SymbolNode(rbrac)));
+            => new ArrayNode(AstNode.Required(new TerminalNode(lbrac)), AstNode.Required(new TerminalNode(rbrac)));
 
         public static ArrayNode Create(Token lbrac, Token rbrac, IOpt<ArrayItemNode> item)
-            => new ArrayNode(new SymbolNode(lbrac).Req(), new SymbolNode(rbrac).Req(), item);
+            => new ArrayNode(new TerminalNode(lbrac).Req(), new TerminalNode(rbrac).Req(), item);
 
         public override string ToString()
             => "A";

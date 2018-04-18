@@ -1,5 +1,5 @@
 ﻿using System;
-using Nett.Parser.Ast;
+using Nett.Parser.Cst;
 
 namespace Nett.Parser
 {

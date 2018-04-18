@@ -1,21 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
-    internal class SymbolNode : Node
+    internal class TerminalNode : Node
     {
-        public SymbolNode(Token token)
+        public TerminalNode(Token terminal)
         {
-            this.Token = token;
+            this.Terminal = terminal;
         }
 
-        public Token Token { get; }
+        public Token Terminal { get; }
 
         public override IEnumerable<Node> Children
             => Enumerable.Empty<Node>();
 
         public override string ToString()
-            => $"s~{this.Token.value}";
+            => $"{this.Terminal.value}";
     }
 }

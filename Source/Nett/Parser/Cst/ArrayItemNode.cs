@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Nett.Parser.Ast
+namespace Nett.Parser.Cst
 {
-    internal sealed class ArrayItemNode : ValueNode
+    internal sealed class ArrayItemNode : Node
     {
         public ArrayItemNode(IReq<ValueNode> value, IOpt<ArraySeparatorNode> separator)
         {
